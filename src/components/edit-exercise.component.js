@@ -3,7 +3,7 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-export default class CreateExercise extends Component{
+export default class EditExercise extends Component{
     constructor(props){
         super(props);
         
@@ -17,17 +17,24 @@ export default class CreateExercise extends Component{
     }
 
     componentDidMount(){
-        this.setState({
-            users:[],
-            username: ''
+        axios.get('http://localhost:5000/exercises/'+this.props.match.params.id, this.props.match.params.id)
+        .then(response => {
+            this.setState({
+                username: response.data.username,
+                description: response.data.description,
+                duration: response.data.duration,
+                data: new Date(response.data.date)
+            })
+        })
+        .catch( error => {
+            console.log('Error: '+error);
         });
 
         axios.get('http://localhost:5000/users')
         .then(res=>{
             if(res.data.length > 0){
                 this.setState({
-                    users: res.data.map(function(user){return user.username;}),
-                    username: res.data[0].username
+                    users: res.data.map(function(user){return user.username;})
                 });
             }
         });
@@ -65,18 +72,18 @@ export default class CreateExercise extends Component{
             duration: this.state.duration,
             date: this.state.date
         }
-        axios.post('http://localhost:5000/exercises/add/', exercise)
+        axios.post('http://localhost:5000/exercises/update/'+this.props.match.params.id, exercise)
         .then(res=>console.log(res.data))
         .catch(err=>console.log('Error: '+err));
 
         console.log(exercise);
-        window.location = "/";
+        //window.location = "/";
     }
 
     render(){
         return(
         <div>
-            <h3>Create New Exercise Log</h3>
+            <h3>Edit Exercise Log</h3>
             <form onSubmit={this.onSubmit}>
                 <div className="form-group">
                     <label>Username: </label>
